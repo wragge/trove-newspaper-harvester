@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "trove-newspaper-harvester"
+  site-url: "https://wragge.github.io/trove-newspaper-harvester"
+  description: "Tool for bulk harvests of digitised newspaper articles from Trove"
+  repo-branch: master
+  repo-url: "https://github.com/wragge/trove-newspaper-harvester"
