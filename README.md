@@ -32,7 +32,9 @@ my_api_key = "mYSecREtkEy"
 my_query_params = prepare_query(query=my_query, key=my_api_key)
 ```
 
-Initialise the harvester with your query parameters.
+Initialise the
+[`Harvester`](https://wragge.github.io/trove-newspaper-harvester/core.html#harvester)
+with your query parameters.
 
 ``` sh
 harvester = Harvester(query_params=my_query_params)
@@ -44,9 +46,13 @@ Start the harvest!
 harvester.harvest()
 ```
 
-If the harvest fails just run `harvester.harvest()` again.
+If the harvest fails just run
+[`Harvester.harvest`](https://wragge.github.io/trove-newspaper-harvester/core.html#harvester.harvest)
+again.
 
-See the documentation for more options and examples.
+[See the core module
+documentation](https://wragge.github.io/trove-newspaper-harvester/core.html)
+for more options and examples.
 
 ## Use as a command-line tool
 
@@ -73,7 +79,9 @@ Trove API query url constructed using something like the [Trove API
 Console](https://troveconsole.herokuapp.com/). Enclose the url in double
 quotes.
 
-See the documentation for more details.
+[See the CLI module
+documentation](https://wragge.github.io/trove-newspaper-harvester/cli.html)
+for more details.
 
 ------------------------------------------------------------------------
 

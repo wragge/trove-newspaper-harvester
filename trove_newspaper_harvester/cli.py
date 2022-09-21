@@ -135,7 +135,7 @@ def main():
     parser_start = subparsers.add_parser("start", help="start a new harvest")
     parser_start.add_argument("query", help="url of the search you want to harvest")
     parser_start.add_argument("key", help="Your Trove API key")
-    parser_start.add_argument("--data_dir", help="directory for harvests")
+    parser_start.add_argument("--data_dir", default="data", help="directory for harvests")
     parser_start.add_argument("--harvest_dir", help="directory for this harvest")
     parser_start.add_argument(
         "--max", type=int, default=0, help="maximum number of results to return"
