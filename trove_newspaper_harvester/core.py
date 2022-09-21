@@ -201,7 +201,7 @@ class Harvester:
         df = pd.json_normalize(json_data)
         df["page_url"] = df["trovePageUrl"].apply(self.create_page_url)
         df["images"] = df["images"].str.join("|")
-        for part in ["edition", "supplement", "section", "lastCorrection.lastupdated"]:
+        for part in ["edition", "supplement", "section", "lastCorrection.lastupdated", "snippet"]:
             if part not in df.columns:
                 df[part] = ""
         df = df[
@@ -337,7 +337,7 @@ class Harvester:
             html_text = article.get("articleText")
             if not html_text:
                 # If the text isn't in the API response (as with AWW), download separately
-                html_text = self.get_aww_text(article_id)
+                html_text = self.get_aww_text(article["id"])
             if html_text:
                 # Convert html to plain text
                 text = html2text.html2text(html_text)
