@@ -19,7 +19,7 @@ pip install trove-newspaper-harvester
 ## Use as a library
 
 ``` python
-from trove-newspaper-harvester.core import prepare_query, Harvester
+from trove_newspaper_harvester.core import prepare_query, Harvester
 ```
 
 Generate a set of query parameters using

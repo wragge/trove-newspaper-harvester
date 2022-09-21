@@ -8,8 +8,6 @@ import argparse
 from pathlib import Path
 from pprint import pprint
 
-import click
-
 from trove_newspaper_harvester.core import (
     Harvester,
     get_harvest,
