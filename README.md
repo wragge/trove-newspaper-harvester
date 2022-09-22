@@ -12,6 +12,16 @@ trove-newspaper-harvester
 [View the full
 documentation](https://wragge.github.io/trove-newspaper-harvester/)
 
+The Trove Newspaper (& Gazette) Harvester makes it easy to download
+large quantities of digitised articles from [Trove’s newspapers and
+gazettes](https://trove.nla.gov.au/newspaper/). Just give it a search
+from the Trove web interface, and the harvester will save the metadata
+of all the articles in a CSV (spreadsheet) file for further analysis.
+You can also save the full text of every article, as well as copies of
+the articles as JPG images, and even PDFs. While the web interface will
+only show you the first 2,000 results matching your search, the
+Newspaper Harvester will get everything.
+
 ## No installation required!
 
 If you want to use the harvester without installing anything, just head
