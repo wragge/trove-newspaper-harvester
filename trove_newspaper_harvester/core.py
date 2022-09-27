@@ -152,6 +152,8 @@ class Harvester:
                     records = results["response"]["zone"][0]["records"]
                     self.process_results(records, pbar)
                     # pbar.update(len(records['article']))
+                if not response.from_cache:
+                    time.sleep(0.2)
         # Add the number harvested to the metadata file
         self.update_meta()
         self.delete_cache()
@@ -259,7 +261,12 @@ class Harvester:
         For easy sorting/aggregation the filename has the format:
             PUBLICATIONDATE-NEWSPAPERID-ARTICLEID
         """
-        date = article["date"]
+        # If the article object doesn't have basic info like date, there's something wrong
+        # Don't try and save files if that's the case
+        try:
+            date = article["date"]
+        except KeyError:
+            return None
         date = date.replace("-", "")
         newspaper_id = article["title"]["id"]
         article_id = article["id"]
@@ -332,37 +339,43 @@ class Harvester:
 
     def save_text(self, article):
         text_filename = self.make_filename(article)
-        text_file = Path(self.harvest_dir, "text", f"{text_filename}.txt")
-        if not text_file.exists():
-            html_text = article.get("articleText")
-            if not html_text:
-                # If the text isn't in the API response (as with AWW), download separately
-                html_text = self.get_aww_text(article["id"])
-            if html_text:
-                # Convert html to plain text
-                text = html2text.html2text(html_text)
-                if self.include_linebreaks == False:
-                    text = re.sub("\s+", " ", text)
+        if text_filename:
+            text_file = Path(self.harvest_dir, "text", f"{text_filename}.txt")
+            if not text_file.exists():
+                html_text = article.get("articleText")
+                if not html_text:
+                    # If the text isn't in the API response (as with AWW), download separately
+                    html_text = self.get_aww_text(article["id"])
+                if html_text:
+                    # Convert html to plain text
+                    text = html2text.html2text(html_text)
+                    if self.include_linebreaks == False:
+                        text = re.sub("\s+", " ", text)
 
-                with open(text_file, "wb") as text_output:
-                    text_output.write(text.encode("utf-8"))
-            else:
-                return ""
-        # Removes the output_dir from path
-        return text_file.relative_to(*text_file.parts[:2])
+                    with open(text_file, "wb") as text_output:
+                        text_output.write(text.encode("utf-8"))
+                else:
+                    return ""
+            # Removes the output_dir from path
+            return text_file.relative_to(*text_file.parts[:2])
+        else:
+            return ""
 
     def save_pdf(self, article):
         pdf_filename = self.make_filename(article)
-        pdf_file = Path(self.harvest_dir, "pdf", f"{pdf_filename}.pdf")
-        if not pdf_file.exists():
-            pdf_url = self.get_pdf_url(article["id"])
-            if pdf_url:
-                response = self.s.get(pdf_url)
-                pdf_file.write_bytes(response.content)
-                # Removes the output_dir from path
-            else:
-                return ""
-        return pdf_file.relative_to(*pdf_file.parts[:2])
+        if pdf_filename:
+            pdf_file = Path(self.harvest_dir, "pdf", f"{pdf_filename}.pdf")
+            if not pdf_file.exists():
+                pdf_url = self.get_pdf_url(article["id"])
+                if pdf_url:
+                    response = self.s.get(pdf_url)
+                    pdf_file.write_bytes(response.content)
+                    # Removes the output_dir from path
+                else:
+                    return ""
+            return pdf_file.relative_to(*pdf_file.parts[:2])
+        else:
+            return ""
 
     def process_results(self, records, pbar):
         """
@@ -403,7 +416,6 @@ class Harvester:
                     pbar.update(1)
                     # Update the number harvested
                     self.harvested += 1
-            time.sleep(0.2)
             # Get the nextStart token
             try:
                 self.start = records["nextStart"]
