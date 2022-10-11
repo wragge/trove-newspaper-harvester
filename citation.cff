@@ -5,7 +5,7 @@ authors:
   given-names: "Tim"
   orcid: "https://orcid.org/0000-0001-7956-4498"
 title: "trove-newspaper-harvester"
-version: 0.6.2
+version: 0.6.4
 doi: 10.5281/zenodo.7103174
-date-released: 2022-09-21
+date-released: 2022-10-11
 url: "https://github.com/wragge/trove-newspaper-harvester"
