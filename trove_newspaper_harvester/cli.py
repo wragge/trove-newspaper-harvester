@@ -13,6 +13,7 @@ from trove_newspaper_harvester.core import (
     get_harvest,
     get_metadata,
     prepare_query,
+    NoQueryError
 )
 
 # %% ../01_cli.ipynb 5
@@ -48,21 +49,35 @@ def start_harvest(
     # Turn the query url into a dictionary of parameters
     params = prepare_query(query, key, text=text)
     # Create the harvester
-    harvester = Harvester(
-        query_params=params,
-        data_dir=data_dir,
-        harvest_dir=harvest_dir,
-        pdf=pdf,
-        text=text,
-        image=image,
-        include_linebreaks=include_linebreaks,
-        max=max,
-    )
-    # Go!
-    harvester.harvest()
-    harvester.save_csv()
-    if not keep_json:
-        Path(harvester.harvest_dir, "results.ndjson").unlink()
+    try:
+        harvester = Harvester(
+            query_params=params,
+            data_dir=data_dir,
+            harvest_dir=harvest_dir,
+            pdf=pdf,
+            text=text,
+            image=image,
+            include_linebreaks=include_linebreaks,
+            max=max,
+        )
+    except HTTPError as e:
+        if e.response.status_code == 403:
+            print("The request could not be authorised, check your API key.")
+        else:
+            raise
+    except NoQueryError:
+        print("No query parameters found, check your query url.")
+    else:
+        # Go!
+        try:
+            harvester.harvest()
+        except AttributeError:
+            pass
+        else:
+            if harvester.maximum > 0:
+                harvester.save_csv()
+                if not keep_json:
+                    Path(harvester.harvest_dir, "results.ndjson").unlink()
 
 def restart_harvest(data_dir="data", harvest_dir=None):
     """
