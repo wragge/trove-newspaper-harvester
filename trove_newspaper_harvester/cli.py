@@ -8,12 +8,14 @@ import argparse
 from pathlib import Path
 from pprint import pprint
 
+from requests.exceptions import HTTPError
+
 from trove_newspaper_harvester.core import (
     Harvester,
+    NoQueryError,
     get_harvest,
     get_metadata,
     prepare_query,
-    NoQueryError
 )
 
 # %% ../01_cli.ipynb 5
@@ -33,7 +35,7 @@ def start_harvest(
     Start a harvest.
 
     Parameters:
-    
+
     * `query` [required, search url from Trove web interface or API, string]
     * `key` [required, Trove API key, string]
     * `data_dir` [optional, directory for harvests, string]
@@ -44,7 +46,7 @@ def start_harvest(
     * `include_linebreaks` [optional, include linebreaks in text files, True or False]
     * `max` [optional, maximum number of results, integer]
     * `keep_json` [optional, keep the results.ndjson file, true or False]
-    
+
     """
     # Turn the query url into a dictionary of parameters
     params = prepare_query(query, key, text=text)
@@ -79,12 +81,13 @@ def start_harvest(
                 if not keep_json:
                     Path(harvester.harvest_dir, "results.ndjson").unlink()
 
+
 def restart_harvest(data_dir="data", harvest_dir=None):
     """
     Restart a failed harvest.
-    
+
     Parameters:
-    
+
     * `data_dir` [optional, directory for harvests, string]
     * `harvest_dir` [optional, directory for this harvest, string]
     """
@@ -113,9 +116,9 @@ def report_harvest(data_dir="data", harvest_dir=None):
     """
     Provide some details of a harvest.
     If no harvest is specified, show the most recent.
-    
+
     Parameters:
-    
+
     * `data_dir` [optional, directory for harvests, string]
     * `harvest_dir` [optional, directory for this harvest, string]
     """
@@ -129,7 +132,7 @@ def report_harvest(data_dir="data", harvest_dir=None):
         print(f"Last harvest started: {meta['date_started']}")
         print(f"Harvest id: {meta['harvest_directory']}")
         print("Query parameters:")
-        pprint(meta['query_parameters'], indent=2)
+        pprint(meta["query_parameters"], indent=2)
         print(f"Max results: {meta['max']}")
         print(f"Include PDFs: {meta['pdf']}")
         print(f"Include text: {meta['text']}")
@@ -137,7 +140,9 @@ def report_harvest(data_dir="data", harvest_dir=None):
         print(f"Include linebreaks: {meta['include_linebreaks']}")
         print(f"Harvested with: {meta['harvester']}")
 
+
 # CLI
+
 
 def main():
     """
@@ -148,7 +153,9 @@ def main():
     parser_start = subparsers.add_parser("start", help="start a new harvest")
     parser_start.add_argument("query", help="url of the search you want to harvest")
     parser_start.add_argument("key", help="Your Trove API key")
-    parser_start.add_argument("--data_dir", default="data", help="directory for harvests")
+    parser_start.add_argument(
+        "--data_dir", default="data", help="directory for harvests"
+    )
     parser_start.add_argument("--harvest_dir", help="directory for this harvest")
     parser_start.add_argument(
         "--max", type=int, default=0, help="maximum number of results to return"
