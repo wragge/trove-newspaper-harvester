@@ -196,7 +196,7 @@ class Harvester:
             json.dump(meta, meta_file, indent=4)
 
     def create_page_url(self, url):
-        if url:
+        if not pd.isnull(url):
             page_id = re.search(r"page\/(\d+)", url).group(1)
             return f"http://trove.nla.gov.au/newspaper/page/{page_id}"
 

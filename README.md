@@ -48,7 +48,7 @@ Generate a set of query parameters using
 my_query = "https://trove.nla.gov.au/search/category/newspapers?keyword=wragge"
 my_api_key = "mYSecREtkEy"
 
-my_query_params = prepare_query(query=my_query, key=my_api_key)
+my_query_params = prepare_query(query=my_query, api_key=my_api_key)
 ```
 
 Initialise the
