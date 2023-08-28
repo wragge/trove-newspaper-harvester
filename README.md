@@ -48,20 +48,20 @@ Generate a set of query parameters using
 my_query = "https://trove.nla.gov.au/search/category/newspapers?keyword=wragge"
 my_api_key = "mYSecREtkEy"
 
-my_query_params = prepare_query(query=my_query, api_key=my_api_key)
+my_query_params = prepare_query(query=my_query)
 ```
 
 Initialise the
 [`Harvester`](https://wragge.github.io/trove-newspaper-harvester/core.html#harvester)
 with your query parameters.
 
-``` sh
-harvester = Harvester(query_params=my_query_params)
+``` python
+harvester = Harvester(query_params=my_query_params, key=my_api_key)
 ```
 
 Start the harvest!
 
-``` sh
+``` python
 harvester.harvest()
 ```
 
