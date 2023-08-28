@@ -14,14 +14,16 @@ from trove_newspaper_harvester.core import (
     Harvester,
     NoQueryError,
     get_harvest,
-    get_metadata,
+    get_config,
     prepare_query,
+    get_crate
 )
 
 # %% ../01_cli.ipynb 5
 def start_harvest(
-    query,
-    key,
+    query=None,
+    key=None,
+    config_file=None,
     data_dir="data",
     harvest_dir=None,
     text=False,
@@ -32,12 +34,13 @@ def start_harvest(
     keep_json=False,
 ):
     """
-    Start a harvest.
+    Start a harvest. Note that you must supply either `query_params` and `key` or `config_file`.
 
     Parameters:
 
-    * `query` [required, search url from Trove web interface or API, string]
-    * `key` [required, Trove API key, string]
+    * `query` [optional, search url from Trove web interface or API, string]
+    * `key` [optional, Trove API key, string]
+    * `config_file` [optional, path to a config file]
     * `data_dir` [optional, directory for harvests, string]
     * `harvest_dir` [optional, directory for this harvest, string]
     * `text` [optional, save articles as text files, True or False]
@@ -49,18 +52,20 @@ def start_harvest(
 
     """
     # Turn the query url into a dictionary of parameters
-    params = prepare_query(query, key, text=text)
+    params = prepare_query(query)
     # Create the harvester
     try:
         harvester = Harvester(
             query_params=params,
+            key=key,
+            config_file=config_file,
             data_dir=data_dir,
             harvest_dir=harvest_dir,
             pdf=pdf,
             text=text,
             image=image,
             include_linebreaks=include_linebreaks,
-            max=max,
+            maximum=max,
         )
     except HTTPError as e:
         if e.response.status_code == 403:
@@ -68,7 +73,7 @@ def start_harvest(
         else:
             raise
     except NoQueryError:
-        print("No query parameters found, check your query url.")
+        print("No query parameters found, check your query url. You must supply either a query and key, or a config_file.")
     else:
         # Go!
         try:
@@ -76,10 +81,11 @@ def start_harvest(
         except AttributeError:
             pass
         else:
-            if harvester.maximum > 0:
+            if harvester.total > 0:
                 harvester.save_csv()
                 if not keep_json:
                     Path(harvester.harvest_dir, "results.ndjson").unlink()
+                    harvester.remove_ndjson_from_crate()
 
 
 def restart_harvest(data_dir="data", harvest_dir=None):
@@ -97,19 +103,13 @@ def restart_harvest(data_dir="data", harvest_dir=None):
         harvest = get_harvest()
     if Path(f"{'-'.join(harvest.parts)}.sqlite").exists():
         data_dir, harvest_dir = harvest.parts
-        meta = get_metadata(harvest)
-        if meta:
-            harvester = Harvester(
-                data_dir=data_dir,
-                harvest_dir=harvest_dir,
-                query_params=meta["query_parameters"],
-                pdf=meta["pdf"],
-                text=meta["text"],
-                image=meta["image"],
-                include_linebreaks=meta["include_linebreaks"],
-                max=meta["max"],
-            )
-            harvester.harvest()
+        config_path = Path(data_dir, harvest_dir, "harvester_config.json")
+        harvester = Harvester(
+            data_dir=data_dir,
+            harvest_dir=harvest_dir,
+            config_file=config_path
+        )
+        harvester.harvest()
 
 
 def report_harvest(data_dir="data", harvest_dir=None):
@@ -123,23 +123,33 @@ def report_harvest(data_dir="data", harvest_dir=None):
     * `harvest_dir` [optional, directory for this harvest, string]
     """
     harvest = get_harvest(data_dir=data_dir, harvest_dir=harvest_dir)
-    meta = get_metadata(harvest)
-    if meta:
+    config = get_config(harvest)
+    crate = get_crate(harvest)
+    harvest_run = crate.get("#harvester_run").properties()
+    results = crate.get("results.csv").properties()
+    harvester = crate.get("https://github.com/wragge/trove-newspaper-harvester")
+    if config:
         # results = get_results(data_dir)
         print("")
-        print("HARVEST METADATA")
-        print("================")
-        print(f"Last harvest started: {meta['date_started']}")
-        print(f"Harvest id: {meta['harvest_directory']}")
+        print("HARVEST PARAMETERS")
+        print("==================")
+        #print(f"Last harvest started: {meta['date_started']}")
+        print(f"Harvest path: {config['full_harvest_dir']}")
         print("Query parameters:")
-        pprint(meta["query_parameters"], indent=2)
-        print(f"Max results: {meta['max']}")
-        print(f"Include PDFs: {meta['pdf']}")
-        print(f"Include text: {meta['text']}")
-        print(f"Include images: {meta['image']}")
-        print(f"Include linebreaks: {meta['include_linebreaks']}")
-        print(f"Harvested with: {meta['harvester']}")
-
+        pprint(config["query_params"], indent=2)
+        print(f"Max results: {config['maximum']}")
+        print(f"Include PDFs: {config['pdf']}")
+        print(f"Include text: {config['text']}")
+        print(f"Include images: {config['image']}")
+        print(f"Include linebreaks: {config['include_linebreaks']}")
+        #print(f"Harvested with: {meta['harvester']}")
+        print("")
+        print("HARVEST RESULTS")
+        print("===============")
+        print(f"Harvest started: {harvest_run['startDate']}")
+        print(f"Harvest ended: {harvest_run.get('endDate', '')}")
+        print(f"Total articles: {results['size']}")
+        print(f"Harvested by: {harvester['name']} version {harvester['softwareVersion']}")
 
 # CLI
 
@@ -151,8 +161,9 @@ def main():
     parser = argparse.ArgumentParser(prog="troveharvester")
     subparsers = parser.add_subparsers(dest="action")
     parser_start = subparsers.add_parser("start", help="start a new harvest")
-    parser_start.add_argument("query", help="url of the search you want to harvest")
-    parser_start.add_argument("key", help="Your Trove API key")
+    parser_start.add_argument("query", nargs="?", default="", help="url of the search you want to harvest")
+    parser_start.add_argument("key", nargs="?", default="", help="Your Trove API key")
+    parser_start.add_argument("--config-file", help="The path to a harvester config file")
     parser_start.add_argument(
         "--data_dir", default="data", help="directory for harvests"
     )
@@ -200,6 +211,7 @@ def main():
         start_harvest(
             query=args.query,
             key=args.key,
+            config_file=args.config_file,
             data_dir=args.data_dir,
             harvest_dir=args.harvest_dir,
             text=args.text,
