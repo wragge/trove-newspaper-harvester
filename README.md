@@ -35,6 +35,9 @@ my GLAM Workbench.
 pip install trove-newspaper-harvester
 ```
 
+Before you do any harvesting you need to get yourself a [Trove API
+key](https://trove.nla.gov.au/about/create-something/using-api).
+
 ## Use as a library
 
 ``` python
@@ -53,7 +56,7 @@ my_query_params = prepare_query(query=my_query)
 
 Initialise the
 [`Harvester`](https://wragge.github.io/trove-newspaper-harvester/core.html#harvester)
-with your query parameters.
+with your query parameters and api key.
 
 ``` python
 harvester = Harvester(query_params=my_query_params, key=my_api_key)
@@ -74,9 +77,6 @@ documentation](https://wragge.github.io/trove-newspaper-harvester/core.html)
 for more options and examples.
 
 ## Use as a command-line tool
-
-Before you do any harvesting you need to get yourself a [Trove API
-key](https://trove.nla.gov.au/about/create-something/using-api).
 
 There are three basic commands:
 
