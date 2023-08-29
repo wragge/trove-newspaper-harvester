@@ -398,7 +398,7 @@ class Harvester:
         Flatten and rename data in the ndjson file to save as CSV.
         """
         with Path(self.harvest_dir, "results.csv").open('w') as csvfile:
-            columns = ['article_id', 'title', 'date', 'page', 'newspaper_id', 'newspaper_title', 'category', 'words', 'illustrated', 'edition', 'supplement', 'section', 'url', 'page_url', 'snippet', 'relevance', 'corrections', 'last_corrected', 'tags', 'comments', 'lists', 'text', 'pdf', 'images']
+            columns = ['article_id', 'title', 'date', 'page', 'newspaper_id', 'newspaper_title', 'category', 'words', 'illustrated', 'edition', 'supplement', 'section', 'url', 'page_url', 'snippet', 'relevance', 'status', 'corrections', 'last_corrected', 'tags', 'comments', 'lists', 'text', 'pdf', 'images']
             writer = csv.DictWriter(csvfile, fieldnames=columns)
             writer.writeheader()
             with self.ndjson_file.open("r") as ndjson_file:
@@ -417,10 +417,11 @@ class Harvester:
                         "edition": data.get("edition", ""),
                         "supplement": data.get("supplement", ""),
                         "section": data.get("section", ""),
-                        "url": data["identifier"],
+                        "url": data.get("identifier", ""),
                         "page_url": data.get("trovePageUrl", ""),
                         "snippet": data.get("snippet", ""),
                         "relevance": data.get("relevance", {}).get("score", ""),
+                        "status": data.get("status", ""),
                         "corrections": data.get("correctionCount", 0),
                         "last_corrected": data.get("lastCorrection", {}).get("lastupdated", ""),
                         "tags": data.get("tagCount", 0),
