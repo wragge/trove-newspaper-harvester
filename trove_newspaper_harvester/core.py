@@ -210,6 +210,8 @@ class Harvester:
         crate.update_jsonld(
             {
                 "@id": "./",
+                "name": f"Dataset of digitised newspaper articles harvested from Trove on {arrow.now().format('D MMMM YYYY')}",
+                "description": f"This dataset of digitised newspaper articles from Trove was created using the Trove Newspaper Harvester. Details of the search query used to generate this dataset can be found in the harvester_config.json file.",
                 "mainEntity": {"@id": "#harvester_run"}
             }
         )
