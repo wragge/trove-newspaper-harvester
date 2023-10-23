@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="a harvester for downloading large numbers of digitised newspaper articles from Trove">
+
+<title>trove-newspaper-harvester - core</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+<script src="https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js" crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="trove-newspaper-harvester - core">
+<meta property="og:description" content="a harvester for downloading large numbers of digitised newspaper articles from Trove">
+<meta property="og:site-name" content="trove-newspaper-harvester">
+<meta name="twitter:title" content="trove-newspaper-harvester - core">
+<meta name="twitter:description" content="a harvester for downloading large numbers of digitised newspaper articles from Trove">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">trove-newspaper-harvester</span>
+    </a>
+  </div>
+        <div class="quarto-navbar-tools ms-auto">
+</div>
+          <div id="quarto-search" class="" title="Search"></div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./core.html">core</a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">trove-newspaper-harvester</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./core.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">core</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">cli</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#harvester" id="toc-harvester" class="nav-link active" data-scroll-target="#harvester">Harvester</a></li>
+  <li><a href="#quick-start" id="toc-quick-start" class="nav-link" data-scroll-target="#quick-start">Quick start</a></li>
+  <li><a href="#prepare_query" id="toc-prepare_query" class="nav-link" data-scroll-target="#prepare_query">prepare_query</a></li>
+  <li><a href="#initialising-a-harvest-using-a-harvester_config.json-file" id="toc-initialising-a-harvest-using-a-harvester_config.json-file" class="nav-link" data-scroll-target="#initialising-a-harvest-using-a-harvester_config.json-file">Initialising a harvest using a <code>harvester_config.json</code> file</a></li>
+  <li><a href="#where-your-harvests-are-saved" id="toc-where-your-harvests-are-saved" class="nav-link" data-scroll-target="#where-your-harvests-are-saved">Where your harvests are saved</a></li>
+  <li><a href="#harvester.harvest" id="toc-harvester.harvest" class="nav-link" data-scroll-target="#harvester.harvest">Harvester.harvest</a></li>
+  <li><a href="#restarting-a-failed-harvest" id="toc-restarting-a-failed-harvest" class="nav-link" data-scroll-target="#restarting-a-failed-harvest">Restarting a failed harvest</a></li>
+  <li><a href="#harvester.save_csv" id="toc-harvester.save_csv" class="nav-link" data-scroll-target="#harvester.save_csv">Harvester.save_csv</a></li>
+  <li><a href="#harvest-results" id="toc-harvest-results" class="nav-link" data-scroll-target="#harvest-results">Harvest results</a></li>
+  <li><a href="#get_harvest" id="toc-get_harvest" class="nav-link" data-scroll-target="#get_harvest">get_harvest</a></li>
+  <li><a href="#get_config" id="toc-get_config" class="nav-link" data-scroll-target="#get_config">get_config</a></li>
+  <li><a href="#get_crate" id="toc-get_crate" class="nav-link" data-scroll-target="#get_crate">get_crate</a></li>
+  <li><a href="#noqueryerror" id="toc-noqueryerror" class="nav-link" data-scroll-target="#noqueryerror">NoQueryError</a></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/wragge/trove-newspaper-harvester/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">core</h1>
+</div>
+
+<div>
+  <div class="description">
+    a harvester for downloading large numbers of digitised newspaper articles from Trove
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<hr>
+<p><a href="https://github.com/wragge/trove-newspaper-harvester/blob/master/trove_newspaper_harvester/core.py#L41" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="harvester" class="level3">
+<h3 class="anchored" data-anchor-id="harvester">Harvester</h3>
+<blockquote class="blockquote">
+<pre><code> Harvester (query_params=None, key=None, data_dir='data',
+            harvest_dir=None, config_file=None, text=False, pdf=False,
+            image=False, include_linebreaks=False, maximum=None)</code></pre>
+</blockquote>
+<p>Harvest large quantities of digitised newspaper articles from Trove. Note that you must supply either <code>query_params</code> and <code>key</code> or <code>config_file</code>.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>query_params</code> [optional, dictionary of parameters]</li>
+<li><code>key</code> [optional, Trove API key]</li>
+<li><code>config_file</code> [optional, path to a config file]</li>
+<li><code>data_dir</code> [optional, directory for harvests, string]</li>
+<li><code>harvest_dir</code> [optional, directory for this harvest, string]</li>
+<li><code>text</code> [optional, save articles as text files, True or False]</li>
+<li><code>pdf</code> [optional, save articles as PDFs, True or False]</li>
+<li><code>image</code> [optional, save articles as images, True or False]</li>
+<li><code>include_linebreaks</code> [optional, include linebreaks in text files, True or False]</li>
+<li><code>maximum</code> [optional, maximum number of results, integer]</li>
+</ul>
+<p>The <a href="https://wragge.github.io/trove-newspaper-harvester/core.html#harvester"><code>Harvester</code></a> class configures and runs your harvest, saving results in a variety of formats.</p>
+<p>You <em>must</em> supply either <code>query_params</code> and <code>key</code>, or the path to a <code>config_file</code>. If you don’t you’ll get a <a href="https://wragge.github.io/trove-newspaper-harvester/core.html#noqueryerror"><code>NoQueryError</code></a>.</p>
+<p>By default, the harvester will save harvests in a directory called <code>data</code>, with each individual harvest in a directory named according to the current date and time (<code>YYYYMMDDHHmmss</code> format). You can change this by setting the <code>data_dir</code> and <code>harvest_dir</code> parameters. This can help you to manage your harvests by grouping together related searches, or giving them meaningful names.</p>
+<p>The harvester generates three data files by default:</p>
+<ul>
+<li><code>harvester_config.json</code> a file that captures the parameters used to launch the harvest</li>
+<li><code>ro-crate-metadata.json</code> a metadata file documenting the harvest in <a href="https://www.researchobject.org/ro-crate/">RO-Crate</a> format</li>
+<li><code>results.ndjson</code> contains details of all the harvested articles in a newline delimited JSON format (each line is a JSON object)</li>
+</ul>
+<p>You can convert the <code>ndjson</code> file to a CSV format using <a href="https://wragge.github.io/trove-newspaper-harvester/core.html#harvester.save_csv"><code>Harvester.save_csv</code></a>.</p>
+<p>The <code>text</code>, <code>pdf</code>, and <code>image</code> options give you the option to save the contents of the articles as either text files, PDF files, or JPG images. Note that saving PDFs and images can be very slow.</p>
+<p>If you only want to harvest part of the results set you can set the <code>maximum</code> parameter to the number of records you want.</p>
+</section>
+<section id="quick-start" class="level3">
+<h3 class="anchored" data-anchor-id="quick-start">Quick start</h3>
+<ul>
+<li>You’ll need a <a href="https://trove.nla.gov.au/about/create-something/using-api">Trove API key</a> to use the harvester.</li>
+<li>Just copy the url from a search in the newspapers and gazettes category.</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> trove_newspaper_harvester.core <span class="im">import</span> prepare_query, Harvester</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>my_api_key <span class="op">=</span> <span class="st">"myApIkEy"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>search_url <span class="op">=</span> <span class="st">"https://trove.nla.gov.au/search/category/newspapers?keyword=wragge"</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert the search url into a set of API parameters</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>my_query_params <span class="op">=</span> prepare_query(search_url)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialise the Harvester</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>harvester <span class="op">=</span> Harvester(query_params<span class="op">=</span>myquery_params, key<span class="op">=</span>my_api_key)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the harvest</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>harvester.harvest()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If you want to harvest the OCRd text of articles as well as metadata, add <code>text=True</code> to the harvester initialisation.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialise the Harvester</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>harvester <span class="op">=</span> Harvester(query_params<span class="op">=</span>myquery_params, key<span class="op">=</span>my_api_key, text<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Similarly you can harvest PDFs and images of articles by adding <code>pdf=True</code> and <code>image=True</code> to the harvester initialisation, but keep in mind that these options will make the harvest much slower!</p>
+<p>You can generate a set of query parameters from a Trove search url using <code>prepare_query()</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TEST</span><span class="co"> FOR MISSING PARAMETERS</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># You need to supply either query_params AND key, OR config_file. </span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># If you don't you'll get a NoQueryError</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> ExceptionExpected(ex<span class="op">=</span>NoQueryError):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    harvester <span class="op">=</span> Harvester()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/wragge/trove-newspaper-harvester/blob/master/trove_newspaper_harvester/core.py#L608" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="prepare_query" class="level3">
+<h3 class="anchored" data-anchor-id="prepare_query">prepare_query</h3>
+<blockquote class="blockquote">
+<pre><code> prepare_query (query)</code></pre>
+</blockquote>
+<p>Converts a Trove search url into a set of parameters ready for harvesting.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>query</code> [required, search url from Trove web interface or API, string]</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>a dictionary of parameters</li>
+</ul>
+<p>The <a href="https://wragge.github.io/trove-newspaper-harvester/core.html#prepare_query"><code>prepare_query</code></a> function converts a search url from the Trove web interface or API into a set of parameters that you can feed to <a href="https://wragge.github.io/trove-newspaper-harvester/core.html#harvester"><code>Harvester</code></a>. It uses the <a href="https://pypi.org/project/trove-query-parser/">trove-query-parser</a> to do most of the work, but adds in a few extra parameters needed for the harvest.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>query_params <span class="op">=</span> prepare_query(<span class="st">"https://trove.nla.gov.au/search/category/newspapers?keyword=wragge&amp;l-state=New%20South%20Wales&amp;l-artType=newspapers&amp;l-title=508&amp;l-decade=191&amp;l-category=Article"</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>query_params</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>{'q': 'wragge',
+ 'l-state': ['New South Wales'],
+ 'l-artType': 'newspapers',
+ 'l-title': ['508'],
+ 'l-decade': ['191'],
+ 'l-category': ['Article'],
+ 'category': 'newspaper',
+ 'encoding': 'json',
+ 'reclevel': 'full',
+ 'bulkHarvest': 'true'}</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TEST</span><span class="co"> query_params()</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert a url from the Trove web interface</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>query_params <span class="op">=</span> prepare_query(</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://trove.nla.gov.au/search/category/newspapers?keyword=wragge"</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Test the results</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> query_params <span class="op">==</span> {</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"q"</span>: <span class="st">"wragge"</span>,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">"category"</span>: <span class="st">"newspaper"</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">"encoding"</span>: <span class="st">"json"</span>,</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">"reclevel"</span>: <span class="st">"full"</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">"bulkHarvest"</span>: <span class="st">"true"</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Convert a url from an API request</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>query_params <span class="op">=</span> prepare_query(</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://api.trove.nla.gov.au/v2/result?q=wragge&amp;category=newspaper&amp;encoding=json&amp;l-category=Article"</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> query_params <span class="op">==</span> {</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>    <span class="st">"q"</span>: [<span class="st">"wragge"</span>],</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"category"</span>: [<span class="st">"newspaper"</span>],</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="st">"encoding"</span>: <span class="st">"json"</span>,</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">"l-category"</span>: [<span class="st">"Article"</span>],</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">"reclevel"</span>: <span class="st">"full"</span>,</span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="st">"bulkHarvest"</span>: <span class="st">"true"</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="initialising-a-harvest-using-a-harvester_config.json-file" class="level3">
+<h3 class="anchored" data-anchor-id="initialising-a-harvest-using-a-harvester_config.json-file">Initialising a harvest using a <code>harvester_config.json</code> file</h3>
+<p>The parameters used to initialise a harvest are saved into a file called <code>harvester_config.json</code>. This provides useful documentation of your harvest, making it possible to reconstruct the process at a later date.</p>
+<p>For example, you might want to re-harvest a particular query a year after your initial harvest to see how the results have changed. Remember, more articles are being added every week! To re-run a harvest, just point the Harvester to the <code>harvester_config.json</code> file. By default, your new harvest will be saved in a fresh directory.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> trove_newspaper_harvester.core <span class="im">import</span> Harvester</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>harvester <span class="op">=</span> Harvester(config_file<span class="op">=</span><span class="st">"path/to/old/harvest/harvester_config.json"</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>harvester.harvest()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note that the <code>harvester_config.json</code> contains all the parameters used for your harvest, including your Trove API key. This makes it easy to re-run a harvest at a later date, but if you’re intending to share your harvest results you should delete or obscure the <code>key</code> value.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TEST</span><span class="co">: Reharvest from config file</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>API_KEY <span class="op">=</span> os.getenv(<span class="st">"TROVE_API_KEY"</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>test_config <span class="op">=</span> {</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">'query_params'</span>: {<span class="st">'q'</span>: <span class="st">'wragge'</span>,</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">'l-state'</span>: [<span class="st">'Western Australia'</span>],</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">'l-illustrated'</span>: <span class="st">'true'</span>,</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">'l-illtype'</span>: [<span class="st">'Photo'</span>],</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">'include'</span>: [<span class="st">'articleText'</span>],</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'category'</span>: <span class="st">'newspaper'</span>,</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">'encoding'</span>: <span class="st">'json'</span>,</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="st">'reclevel'</span>: <span class="st">'full'</span>,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="st">'bulkHarvest'</span>: <span class="st">'true'</span>},</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="st">'key'</span>: API_KEY,</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="st">'full_harvest_dir'</span>: <span class="st">'harvests/test_harvest'</span>,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="st">'maximum'</span>: <span class="va">None</span>,</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">'text'</span>: <span class="va">True</span>,</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">'pdf'</span>: <span class="va">False</span>,</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">'image'</span>: <span class="va">False</span>,</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">'include_linebreaks'</span>: <span class="va">False</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>Path(<span class="st">"harvester_config.json"</span>).write_text(json.dumps(test_config))</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialise the harvester</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>harvester <span class="op">=</span> Harvester(config_file<span class="op">=</span><span class="st">"harvester_config.json"</span>)</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the harvest!</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>harvester.harvest()</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>shutil.rmtree(Path(<span class="st">"data"</span>))</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>Path(<span class="st">"harvester_config.json"</span>).unlink()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"e779945344ca4169803228938c0ea350","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+</section>
+<section id="where-your-harvests-are-saved" class="level3">
+<h3 class="anchored" data-anchor-id="where-your-harvests-are-saved">Where your harvests are saved</h3>
+<p>By default, harvests are saved in a directory named <code>data</code>. Each individual harvest is saved in a directory named according to the current date/time, for example: <code>data/20230826125205</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TEST</span><span class="co"> HARVESTER CREATES DEFAULT HARVEST DIRECTORY</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># This example initialises a harvest, but doesn't actually run it.</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>API_KEY <span class="op">=</span> os.getenv(<span class="st">"TROVE_API_KEY"</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare query params</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>query_params <span class="op">=</span> prepare_query(</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://trove.nla.gov.au/search/category/newspapers?keyword=wragge"</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialise the Harvester with the query parameters</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>harvester <span class="op">=</span> Harvester(query_params<span class="op">=</span>query_params, key<span class="op">=</span>API_KEY, text<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="co"># if you haven't set the max parameter, the total value will be the total number of results</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> harvester.total <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total results: </span><span class="sc">{</span>harvester<span class="sc">.</span>total<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that the data directory exists</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> Path(<span class="st">"data"</span>).exists() <span class="kw">is</span> <span class="va">True</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that a harvest directory with the current date/hour exists in the data directory</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(<span class="bu">list</span>(Path(<span class="st">"data"</span>).glob(<span class="ss">f'</span><span class="sc">{</span>arrow<span class="sc">.</span>utcnow()<span class="sc">.</span><span class="bu">format</span>(<span class="st">"YYYYMMDDHH"</span>)<span class="sc">}</span><span class="ss">*'</span>))) <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that a 'text' directory exists in the harvest directory</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>    Path(<span class="bu">next</span>(Path(<span class="st">"data"</span>).glob(<span class="ss">f'</span><span class="sc">{</span>arrow<span class="sc">.</span>utcnow()<span class="sc">.</span><span class="bu">format</span>(<span class="st">"YYYYMMDDHH"</span>)<span class="sc">}</span><span class="ss">*'</span>))).exists()</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">is</span> <span class="va">True</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that the cache has been initialised</span></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> Path(<span class="ss">f"</span><span class="sc">{</span><span class="st">'-'</span><span class="sc">.</span>join(harvester.harvest_dir.parts)<span class="sc">}</span><span class="ss">.sqlite"</span>).exists()</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean up</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>shutil.rmtree(Path(<span class="st">"data"</span>))</span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a>harvester.delete_cache()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Total results: 140,806</code></pre>
+</div>
+</div>
+<p>You can change the default directories using the <code>data_dir</code> and <code>harvest_dir</code> parameters. For example, if you wanted to keep all the harvests relating to a specific project together, you could set <code>data_dir="my-cool-project"</code>. You can use <code>harvest_dir</code> to give your harvest a meaningful name, for example <code>harvest_dir="search-for-cat-photos"</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TEST</span><span class="co"> HARVESTER CREATES REQUESTED HARVEST DIRECTORY</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>query_params <span class="op">=</span> prepare_query(</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://trove.nla.gov.au/search/category/newspapers?keyword=wragge"</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>harvester <span class="op">=</span> Harvester(</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    query_params<span class="op">=</span>query_params,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span>API_KEY,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    data_dir<span class="op">=</span><span class="st">"harvests"</span>,</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    harvest_dir<span class="op">=</span><span class="st">"my_trove_harvest"</span>,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    pdf<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    image<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> harvester.total <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Total results: </span><span class="sc">{</span>harvester<span class="sc">.</span>total<span class="sc">:,}</span><span class="ss">"</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that the data directory exists</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> Path(<span class="st">"harvests"</span>).exists() <span class="kw">is</span> <span class="va">True</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> Path(<span class="st">"harvests"</span>, <span class="st">"my_trove_harvest"</span>).exists() <span class="kw">is</span> <span class="va">True</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> Path(<span class="st">"harvests"</span>, <span class="st">"my_trove_harvest"</span>, <span class="st">"pdf"</span>).exists() <span class="kw">is</span> <span class="va">True</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> Path(<span class="st">"harvests"</span>, <span class="st">"my_trove_harvest"</span>, <span class="st">"image"</span>).exists() <span class="kw">is</span> <span class="va">True</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean up</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>shutil.rmtree(Path(<span class="st">"harvests"</span>))</span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>harvester.delete_cache()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Total results: 140,806</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/wragge/trove-newspaper-harvester/blob/master/trove_newspaper_harvester/core.py#L168" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="harvester.harvest" class="level3">
+<h3 class="anchored" data-anchor-id="harvester.harvest">Harvester.harvest</h3>
+<blockquote class="blockquote">
+<pre><code> Harvester.harvest ()</code></pre>
+</blockquote>
+<p>Start the harvest and loop over the result set until finished.</p>
+<p>Once the harvester is initialised, you can start the harvest by calling <code>Harvester.harvest()</code>. A progress bar will keep you informed of the status of your harvest.</p>
+<p>Add <code>text=True</code> to include the OCRd full text of the articles in the harvest. The contents of each article is saved as a separate file in the <code>text</code> directory. See the <a href="#harvest-results">harvest results</a> section below for more information.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># HARVEST WITH TEXT &gt; 100 records</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare query parameters</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>query_params <span class="op">=</span> prepare_query(</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://trove.nla.gov.au/search/category/newspapers?keyword=wragge&amp;l-state=Western%20Australia&amp;l-illustrationType=Photo"</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialise the harvester</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>harvester <span class="op">=</span> Harvester(</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    query_params<span class="op">=</span>query_params,</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span>API_KEY,</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    data_dir<span class="op">=</span><span class="st">"harvests"</span>,</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    harvest_dir<span class="op">=</span><span class="st">"test_harvest"</span>,</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    text<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the harvest</span></span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>harvester.harvest()</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a><span class="co"># ---TESTS---</span></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that the ndjson file exists and lines can be parsed as json</span></span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>json_data <span class="op">=</span> []</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> harvester.ndjson_file.<span class="bu">open</span>(<span class="st">"r"</span>) <span class="im">as</span> ndjson_file:</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> line <span class="kw">in</span> ndjson_file:</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>        json_data.append(json.loads(line.strip()))</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a><span class="co"># The length of the ndjson file should equal the number of records harvested</span></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(json_data) <span class="op">==</span> harvester.harvested</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that the metadata file has been created</span></span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> get_config(harvester.harvest_dir)</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> config[<span class="st">"query_params"</span>] <span class="op">==</span> query_params</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that the RO-Crate file was created</span></span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>crate <span class="op">=</span> get_crate(harvester.harvest_dir)</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>eids <span class="op">=</span> [</span>
+<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>    <span class="st">"./"</span>, </span>
+<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>    <span class="st">"ro-crate-metadata.json"</span>, </span>
+<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>    <span class="st">"#harvester_run"</span>, </span>
+<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>    <span class="st">"harvester_config.json"</span>, </span>
+<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://github.com/wragge/trove-newspaper-harvester"</span>,</span>
+<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>    <span class="st">"results.ndjson"</span>,</span>
+<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>    <span class="st">"text"</span>,</span>
+<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://creativecommons.org/publicdomain/zero/1.0/"</span>,</span>
+<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a>    <span class="st">"http://rightsstatements.org/vocab/CNE/1.0/"</span>,</span>
+<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a>    <span class="st">"http://rightsstatements.org/vocab/NKC/1.0/"</span> </span>
+<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> eid <span class="kw">in</span> eids:</span>
+<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">assert</span> crate.get(eid) <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
+<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that a text file exists and can be read</span></span>
+<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> Path(<span class="st">"harvests"</span>, <span class="st">"test_harvest"</span>, json_data[<span class="dv">0</span>][<span class="st">"articleText"</span>]).exists()</span>
+<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> Path(<span class="st">"harvests"</span>, <span class="st">"test_harvest"</span>, json_data[<span class="dv">0</span>][<span class="st">"articleText"</span>]).read_text()</span>
+<span id="cb16-55"><a href="#cb16-55" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">isinstance</span>(text, <span class="bu">str</span>)</span>
+<span id="cb16-56"><a href="#cb16-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-57"><a href="#cb16-57" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that the cache file was deleted</span></span>
+<span id="cb16-58"><a href="#cb16-58" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> Path(<span class="ss">f"</span><span class="sc">{</span><span class="st">'-'</span><span class="sc">.</span>join(harvester.harvest_dir.parts)<span class="sc">}</span><span class="ss">.sqlite"</span>).exists() <span class="kw">is</span> <span class="va">False</span></span>
+<span id="cb16-59"><a href="#cb16-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-60"><a href="#cb16-60" aria-hidden="true" tabindex="-1"></a>shutil.rmtree(Path(<span class="st">"harvests"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"d7a030e3bf1d4eea9ae60bb3cdb43041","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+<p>The text of articles in the <em>Australian Women’s Weekly</em> is not available through the API, so the harvester has to scrape it separately. This happens automatically. The code below is just a little test to make sure it’s working as expected.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ---</span><span class="al">TEST</span><span class="co"> FOR AWW---</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare query params</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>query_params <span class="op">=</span> prepare_query(</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://trove.nla.gov.au/search/category/newspapers?keyword=wragge"</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialise the Harvester with the query parameters</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>harvester <span class="op">=</span> Harvester(query_params<span class="op">=</span>query_params, key<span class="op">=</span>API_KEY, text<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Get html text of an article</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>text <span class="op">=</span> harvester.get_aww_text(<span class="dv">51187457</span>)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="st">"THE SHAPE OF THINGS TO COME"</span> <span class="kw">in</span> text</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Clean up</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>harvester.delete_cache()</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>shutil.rmtree(Path(<span class="st">"data"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>You can include PDFs and images of the articles by adding <code>pdf=True</code> or <code>image=True</code> to the harvester initialisation. It’s important to note that this will slow down the harvest a lot, as each file needs to be generated and downloaded individually.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># HARVEST WITH PDF AND IMAGE -- 1 RECORD MAX</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare the query parameters</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>query_params <span class="op">=</span> prepare_query(</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://trove.nla.gov.au/search/category/newspapers?keyword=wragge&amp;l-illustrationType=Cartoon"</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialise the harvester</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>harvester <span class="op">=</span> Harvester(</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    query_params<span class="op">=</span>query_params,</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span>API_KEY,</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    data_dir<span class="op">=</span><span class="st">"harvests"</span>,</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    harvest_dir<span class="op">=</span><span class="st">"test_harvest"</span>,</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    pdf<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    image<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    maximum<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the harvest!</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>harvester.harvest()</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="co"># ---TESTS---</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that the ndjson file exists and lines can be parsed as json</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>json_data <span class="op">=</span> []</span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> harvester.ndjson_file.<span class="bu">open</span>(<span class="st">"r"</span>) <span class="im">as</span> ndjson_file:</span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> line <span class="kw">in</span> ndjson_file:</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>        json_data.append(json.loads(line.strip()))</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> harvester.maximum <span class="op">==</span> harvester.harvested</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a><span class="co"># The length of the ndjson file should equal the number of records harvested</span></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="bu">len</span>(json_data) <span class="op">==</span> harvester.harvested</span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that a pdf and image file exist</span></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> Path(<span class="st">"harvests"</span>, <span class="st">"test_harvest"</span>, json_data[<span class="dv">0</span>][<span class="st">"pdf"</span>]).exists()</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> Path(<span class="st">"harvests"</span>, <span class="st">"test_harvest"</span>, json_data[<span class="dv">0</span>][<span class="st">"images"</span>][<span class="dv">0</span>]).exists()</span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>shutil.rmtree(Path(<span class="st">"harvests"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"7cdd118995524a6b926bc485ad03844b","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+<p>Naturally enough, nothing is harvested from a query with no results. Check your search and your API key!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># HARVEST WITH NO RESULTS</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare query parameters</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>query_params <span class="op">=</span> prepare_query(</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://trove.nla.gov.au/search/category/newspapers?keyword=wwgagsgshggshghso"</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialise the harvester</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>harvester <span class="op">=</span> Harvester(</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    query_params<span class="op">=</span>query_params,</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span>API_KEY</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the harvest</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>harvester.harvest()</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> harvester.harvested <span class="op">==</span> <span class="dv">0</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>shutil.rmtree(Path(<span class="st">"data"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="restarting-a-failed-harvest" class="level3">
+<h3 class="anchored" data-anchor-id="restarting-a-failed-harvest">Restarting a failed harvest</h3>
+<p>The <a href="https://wragge.github.io/trove-newspaper-harvester/core.html#harvester"><code>Harvester</code></a> uses <a href="https://pypi.org/project/requests-cache/">requests-cache</a> to cache API responses. This makes it easy to restart a failed harvest. All you need to do is call <code>Harvester.harvest()</code> again and it will pick up where it left off.</p>
+<hr>
+<p><a href="https://github.com/wragge/trove-newspaper-harvester/blob/master/trove_newspaper_harvester/core.py#L398" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="harvester.save_csv" class="level3">
+<h3 class="anchored" data-anchor-id="harvester.save_csv">Harvester.save_csv</h3>
+<blockquote class="blockquote">
+<pre><code> Harvester.save_csv ()</code></pre>
+</blockquote>
+<p>Flatten and rename data in the ndjson file to save as CSV.</p>
+<p>Harvested metadata is saved, by default, in a newline-delimited JSON file. If you’d prefer the results in CSV format, just call <code>Harvester.save_csv()</code>. See below for more information on results formats.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TEST</span><span class="co"> - save harvest results as CSV</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare query parameters</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>query_params <span class="op">=</span> prepare_query(</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://trove.nla.gov.au/search/category/newspapers?keyword=wragge&amp;l-state=Western%20Australia&amp;l-illustrationType=Photo"</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialise the harvester</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>harvester <span class="op">=</span> Harvester(</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>    query_params<span class="op">=</span>query_params,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span>API_KEY,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>    data_dir<span class="op">=</span><span class="st">"harvests"</span>,</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    harvest_dir<span class="op">=</span><span class="st">"test_harvest"</span>,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    text<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the harvest</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>harvester.harvest()</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Save results as CSV</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>harvester.save_csv()</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="co"># ---TESTS---</span></span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Check that CSV file exists</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>csv_file <span class="op">=</span> Path(harvester.harvest_dir, <span class="st">"results.csv"</span>)</span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> csv_file.exists()</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a><span class="co"># Open the CSV file and check that the number of rows equals number of records harvested</span></span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(csv_file)</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> df.shape[<span class="dv">0</span>] <span class="op">==</span> harvester.harvested</span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>shutil.rmtree(Path(<span class="st">"harvests"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"bc66d4461316492b9129e86aa4ac2d1a","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+</div>
+</section>
+<section id="harvest-results" class="level3">
+<h3 class="anchored" data-anchor-id="harvest-results">Harvest results</h3>
+<p>There will be at least three files created for each harvest:</p>
+<ul>
+<li><code>harvester_config.json</code> a file that captures the parameters used to launch the harvest</li>
+<li><code>ro-crate-metadata.json</code> a metadata file documenting the harvest in <a href="https://www.researchobject.org/ro-crate/">RO-Crate</a> format</li>
+<li><code>results.ndjson</code> contains details of all the harvested articles in a newline delimited JSON format (each line is a JSON object)</li>
+</ul>
+<p>The <code>results.ndjson</code> stores the API results from Trove <em>as is</em>, with a couple of exceptions:</p>
+<ul>
+<li>if the <code>text</code> parameter has been set to <code>True</code>, the <code>articleText</code> field will contain the path to a <code>.txt</code> file containing the OCRd text contents of the article (rather than containing the text itself)</li>
+<li>similarly if PDFs and images are requests, the <code>pdf</code> and <code>image</code> fields int the <code>ndjson</code> file will point to the saved files.</li>
+</ul>
+<p>You’ll probably find it easier to work with the results in CSV format. The <code>Harvester.save_csv()</code> method flattens the <code>ndjson</code> file and renames some columns to make them compatible with previous versions of the harvest. It produces a <code>results.csv</code> file, which is a plain text CSV (Comma Separated Values) file. You can open it with any spreadsheet program. The details recorded for each article are:</p>
+<ul>
+<li><code>article_id</code> – a unique identifier for the article</li>
+<li><code>title</code> – the title of the article</li>
+<li><code>date</code> – in ISO format, YYYY-MM-DD</li>
+<li><code>page</code> – page number (of course), but might also indicate the page is part of a supplement or special section</li>
+<li><code>newspaper_id</code> – a unique identifier for the newspaper or gazette title (this can be used to retrieve more information or build a link to the web interface)</li>
+<li><code>newspaper_title</code> – the name of the newspaper (or gazette)</li>
+<li><code>category</code> – one of ‘Article’, ‘Advertising’, ‘Detailed lists, results, guides’, ‘Family Notices’, or ‘Literature’</li>
+<li><code>words</code> – number of words in the article</li>
+<li><code>illustrated</code> – is it illustrated (values are y or n)</li>
+<li><code>edition</code> – edition of newspaper (rarely used)</li>
+<li><code>supplement</code> – section of newspaper (rarely used)</li>
+<li><code>section</code> – section of newspaper (rarely used)</li>
+<li><code>url</code> – the persistent url for the article</li>
+<li><code>page_url</code> – the persistent url of the page on which the article is published</li>
+<li><code>snippet</code> – short text sample</li>
+<li><code>relevance</code> – search relevance score of this result</li>
+<li><code>status</code> – some articles that are still being processed will have the status “coming soon” and might be missing other fields</li>
+<li><code>corrections</code> – number of text corrections</li>
+<li><code>last_correction</code> – date of last correction</li>
+<li><code>tags</code> – number of attached tags</li>
+<li><code>comments</code> – number of attached comments</li>
+<li><code>lists</code> – number of lists this article is included in</li>
+<li><code>text</code> – path to text file</li>
+<li><code>pdf</code> – path to PDF file</li>
+<li><code>image</code> – path to image file</li>
+</ul>
+<p>If you’ve asked for text files PDFs or images, there will be additional directories containing those files. Files containing the OCRd text of the articles will be saved in a directory named <code>text</code>. These are just plain text files, stripped on any HTML. These files include some basic metadata in their file titles – the date of the article, the id number of the newspaper, and the id number of the article. So, for example, the filename <code>19460104-1002-206680758.txt</code> tells you:</p>
+<ul>
+<li><code>19460104</code> – the article was published on 4 January 1946 (YYYYMMDD)</li>
+<li><code>1002</code> – the article was published in <a href="https://trove.nla.gov.au/newspaper/title/1002"><em>The Tribune</em></a></li>
+<li><code>206680758</code> – the <a href="http://nla.gov.au/nla.news-article206680758">article’s unique identifier</a></li>
+</ul>
+<p>As you can see, you can use the newspaper and article ids to create direct links into Trove:</p>
+<ul>
+<li>to a newspaper or gazette <code>https://trove.nla.gov.au/newspaper/title/[newspaper id]</code></li>
+<li>to an article <code>http://nla.gov.au/nla.news-article[article id]</code></li>
+</ul>
+<p>Similarly, if you’ve asked for copies of the articles as images, they’ll be in a directory named <code>image</code>. The image file names are similar to the text files, but with an extra id number for the page from which the image was extracted. So, for example, the image filename <code>19250411-460-140772994-11900413.jpg</code> tells you:</p>
+<ul>
+<li><code>19250411</code> – the article was published on 11 April 1925 (YYYYMMDD)</li>
+<li><code>460</code> – the article was published in <a href="https://trove.nla.gov.au/newspaper/title/460"><em>The Australasian</em></a></li>
+<li><code>140772994</code> – the <a href="http://nla.gov.au/nla.news-article140772994">article’s unique identifier</a></li>
+<li><code>11900413</code> – the <a href="https://trove.nla.gov.au/newspaper/page/11900413">page’s unique identifier</a> (some articles can be split over multiple pages)</li>
+</ul>
+<p>The text of articles in the <em>Australian Women’s Weekly</em> is not available through the API, so the harvester has to scrape it separately. This happens automatically. The code below is just a little test to make sure it’s working as expected.</p>
+<hr>
+<p><a href="https://github.com/wragge/trove-newspaper-harvester/blob/master/trove_newspaper_harvester/core.py#L644" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_harvest" class="level3">
+<h3 class="anchored" data-anchor-id="get_harvest">get_harvest</h3>
+<blockquote class="blockquote">
+<pre><code> get_harvest (data_dir='data', harvest_dir=None)</code></pre>
+</blockquote>
+<p>Get the path to a harvest. If data_dir and harvest_dir are not supplied, this will return the most recent harvest in the ‘data’ directory.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>data_dir</code> [optional, directory for harvests, string]</li>
+<li><code>harvest_dir</code> [optional, directory for this harvest, string]</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>a pathlib.Path object pointing to the harvest directory</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">TEST</span><span class="co"> GET HARVEST</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Create test folders</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>Path(<span class="st">"data"</span>, <span class="st">"20220919100000"</span>).mkdir(parents<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>Path(<span class="st">"data"</span>, <span class="st">"20220919200000"</span>).mkdir(parents<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Get latest harvest folder</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>harvest <span class="op">=</span> get_harvest()</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(harvest)</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="co"># ---TESTS---</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> harvest.name <span class="op">==</span> <span class="st">"20220919200000"</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>harvest <span class="op">=</span> get_harvest(data_dir<span class="op">=</span><span class="st">"data"</span>, harvest_dir<span class="op">=</span><span class="st">"20220919100000"</span>)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> harvest.name <span class="op">==</span> <span class="st">"20220919100000"</span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>shutil.rmtree(Path(<span class="st">"data"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>data/20220919200000</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/wragge/trove-newspaper-harvester/blob/master/trove_newspaper_harvester/core.py#L667" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_config" class="level3">
+<h3 class="anchored" data-anchor-id="get_config">get_config</h3>
+<blockquote class="blockquote">
+<pre><code> get_config (harvest)</code></pre>
+</blockquote>
+<p>Get the query config parameters from a harvest directory.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>harvest</code> [required, path to harvest, string or pathlib.Path]</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>config dictionary</li>
+</ul>
+<p>The <code>harvester_config.json</code> file contains the parameters used to initiate a harvest. Using <a href="https://wragge.github.io/trove-newspaper-harvester/core.html#get_config"><code>get_config</code></a> you can retrieve the <code>harvester_config.json</code> for for a particular harvest. This can be useful if, for example, you want to re-run a harvest at a later data – you can just grab the <code>query_paramaters</code> and feed them into a new <a href="https://wragge.github.io/trove-newspaper-harvester/core.html#harvester"><code>Harvester</code></a> instance.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare query parameters</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>query_params <span class="op">=</span> prepare_query(</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://trove.nla.gov.au/search/category/newspapers?keyword=wragge&amp;l-state=Western%20Australia&amp;l-illustrationType=Photo"</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialise the harvester</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>harvester <span class="op">=</span> Harvester(</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    query_params<span class="op">=</span>query_params,</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span>API_KEY,</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    text<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the harvest</span></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>harvester.harvest()</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the most recent harvest</span></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>harvest <span class="op">=</span> get_harvest()</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the metadata</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> get_config(harvest)</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Obscure key and display</span></span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>config[<span class="st">"key"</span>] <span class="op">=</span> <span class="st">"########"</span></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>display(config)</span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a><span class="co"># ---TESTS---</span></span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> config[<span class="st">"query_params"</span>][<span class="st">"q"</span>] <span class="op">==</span> <span class="st">"wragge"</span></span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> config[<span class="st">"text"</span>] <span class="kw">is</span> <span class="va">True</span></span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>shutil.rmtree(Path(<span class="st">"data"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"da913b43fd424aaba1bea97e3051fe33","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>{'query_params': {'q': 'wragge',
+  'l-state': ['Western Australia'],
+  'l-illustrated': 'true',
+  'l-illustrationType': ['Photo'],
+  'category': 'newspaper',
+  'encoding': 'json',
+  'reclevel': 'full',
+  'bulkHarvest': 'true',
+  'include': ['articleText']},
+ 'key': '########',
+ 'full_harvest_dir': 'data/20231023042615',
+ 'maximum': None,
+ 'text': True,
+ 'pdf': False,
+ 'image': False,
+ 'include_linebreaks': False}</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/wragge/trove-newspaper-harvester/blob/master/trove_newspaper_harvester/core.py#L687" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_crate" class="level3">
+<h3 class="anchored" data-anchor-id="get_crate">get_crate</h3>
+<blockquote class="blockquote">
+<pre><code> get_crate (harvest)</code></pre>
+</blockquote>
+<p>Get the RO-Crate metadata file from a harvest directory.</p>
+<p>Parameters:</p>
+<ul>
+<li><code>harvest</code> [required, path to harvest, string or pathlib.Path]</li>
+</ul>
+<p>Returns:</p>
+<ul>
+<li>ROCrate object</li>
+</ul>
+<p>Trove is changing all the time, so it’s important to document your harvests. The Harvester automatically creates a metadata file using the <a href="https://www.researchobject.org/ro-crate/">Research Object Crate (RO-Crate) format</a>. This documents when the harvest was run, how many results were saved, and the version of the harvester. It is linked to the <code>harvester_config.json</code> file that save the query parameters and harvester settings. This function retrieves the RO-Crate file for a given harvest. It returns an RO-Crate object – see the <a href="https://github.com/ResearchObject/ro-crate-py">ro-crate.py package</a> for more information.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare query parameters</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>query_params <span class="op">=</span> prepare_query(</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"https://trove.nla.gov.au/search/category/newspapers?keyword=wragge&amp;l-state=Western%20Australia&amp;l-illustrationType=Photo"</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialise the harvester</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>harvester <span class="op">=</span> Harvester(</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    query_params<span class="op">=</span>query_params,</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    key<span class="op">=</span>API_KEY,</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    text<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Start the harvest</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>harvester.harvest()</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the most recent harvest</span></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>harvest <span class="op">=</span> get_harvest()</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the metadata</span></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>crate <span class="op">=</span> get_crate(harvest)</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> eid <span class="kw">in</span> crate.get_entities():</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(eid.<span class="bu">id</span>, eid.<span class="bu">type</span>)</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> crate.get(<span class="st">"./"</span>).<span class="bu">type</span> <span class="op">==</span> <span class="st">"Dataset"</span></span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> crate.get(<span class="st">"harvester_config.json"</span>).properties()[<span class="st">"encodingFormat"</span>] <span class="op">==</span> <span class="st">"application/json"</span></span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> crate.get(<span class="st">"./"</span>).properties()[<span class="st">"mainEntity"</span>] <span class="op">==</span> {<span class="st">"@id"</span>: <span class="st">"#harvester_run"</span>}</span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a>shutil.rmtree(Path(<span class="st">"data"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<script type="application/vnd.jupyter.widget-view+json">
+{"model_id":"45de791af2c54d64b21d2f41fc6405ae","version_major":2,"version_minor":0,"quarto_mimetype":"application/vnd.jupyter.widget-view+json"}
+</script>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>./ Dataset
+ro-crate-metadata.json CreativeWork
+harvester_config.json File
+results.ndjson ['File', 'Dataset']
+text ['File', 'Dataset']
+#harvester_run CreateAction
+https://github.com/wragge/trove-newspaper-harvester SoftwareApplication
+http://rightsstatements.org/vocab/NKC/1.0/ CreativeWork
+http://rightsstatements.org/vocab/CNE/1.0/ CreativeWork
+https://creativecommons.org/publicdomain/zero/1.0/ CreativeWork</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/wragge/trove-newspaper-harvester/blob/master/trove_newspaper_harvester/core.py#L34" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="noqueryerror" class="level3">
+<h3 class="anchored" data-anchor-id="noqueryerror">NoQueryError</h3>
+<p>Exception triggered by empty query.</p>
+<hr>
+<p>Created by <a href="https://timsherratt.org/">Tim Sherratt</a> for the <a href="https://glam-workbench.net/">GLAM Workbench</a>. Support this project by becoming a <a href="https://github.com/sponsors/wragge?o=esb">GitHub sponsor</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script type="application/vnd.jupyter.widget-state+json">
+{"state":{},"version_major":2,"version_minor":0}
+</script>
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
